@@ -27,10 +27,30 @@ This stage involved critical engineering decisions to balance data integrity wit
 
 ### 3. Star Schema Modeling & Loading (Load)
 
-I designed a **Star Schema** in MySQL to ensure optimal query performance:
+## 🏗️ Design Decisions & Architectural Justification
 
-* **Fact Table (`fact_applications`)**: Centralizes metrics like interview scores and hiring status.
-* **Dimension Tables**: `dim_candidate`, `dim_technology`, `dim_location`, and `dim_date`.
+According to the project requirements, I implemented a **Star Schema** dimensional model. This decision was based on the following engineering principles:
+
+### 1. Choice of Dimensional Modeling (Star Schema)
+The Star Schema was chosen over a flat table to:
+* **Improve Query Performance**: By separating descriptive attributes into dimensions, we reduce data redundancy and improve join efficiency for Power BI.
+* **Maintainability**: Changes in technology names or candidate levels only need to be updated in one place (the dimension table) without affecting millions of rows in the fact table.
+
+### 2. Surrogate Keys vs. Natural Keys
+* **Decision**: As per the "Important" guidelines, I avoided using natural keys from the CSV as primary keys.
+* **Implementation**: I generated **Surrogate Keys (SK)** for all tables (e.g., `Application_SK`, `Candidate_SK`, `Location_SK`). 
+* **Reasoning**: Surrogate keys insulate the Data Warehouse from changes in the source system's business logic and improve join performance by using integer data types instead of strings.
+
+### 3. Defining the Grain
+* **Definition**: The grain of the Data Warehouse is explicitly defined as **one row per candidate application**.
+* **Justification**: This is the lowest level of detail available in the source data, allowing HR to perform granular analysis on individual scores while still enabling high-level aggregations like hiring rates by country or year.
+
+### 4. Handling Data Quality (The "Relaxed Threshold" Strategy)
+* **Context**: Initial transformation rules led to significant data loss.
+* **Action**: I adjusted the cleaning logic to accommodate the statistical variance of the randomly generated dataset.
+* **Result**: This decision successfully increased the valid data sample from 31,524 to **37,348 records**, a critical gain for the reliability of the 13.36% Hiring Rate metric.
+
+<img width="6920" height="3765" alt="star_schema" src="https://github.com/user-attachments/assets/1cdd7474-1e79-4941-9a82-0878093cdeb1" />
 
 ---
 
@@ -56,16 +76,29 @@ The following 6 KPIs were developed to provide a 360-degree view of the recruitm
 * **Metric**: Compares `Code Challenge` vs. `Technical Interview` averages.
 * **Insight**: Validates if higher seniority levels actually correlate with better technical performance, ensuring the "Senior" label matches technical reality.
 
+<img width="1163" height="650" alt="Captura de pantalla 2026-02-27 031429" src="https://github.com/user-attachments/assets/2b0f5564-cc64-486c-9ebc-28b9fc0f9fe6" />
 
 
 ---
 
-## 💻 Tech Stack
+## 🛠️ Technological Stack & Dependencies
 
-* **Language**: Python 3.x (Pandas)
-* **Database**: MySQL Server
-* **BI Tool**: Power BI Desktop
-* **Connectivity**: MySQL Connector/NET 8.0.28 (Optimized for Power BI compatibility)
+The project leverages a robust Python-based data ecosystem to manage the end-to-end ETL process and the subsequent analytical layer:
+
+### 🐍 Python Backend
+* **Python 3.x**: The core engine for scripting and automation.
+* **Pandas**: Utilized for high-performance data manipulation, filtering, and the complex transformation logic required to clean the 50,000 source records.
+* **SQLAlchemy**: Acts as the SQL toolkit and Object-Relational Mapper (ORM), providing a standardized interface to interact with the database.
+* **PyMySQL**: The database driver used to facilitate communication between Python and the MySQL server.
+* **python-dotenv**: Employed for secure credential management, ensuring database passwords and hosts are handled through environmental variables for security.
+
+### 🗄️ Data Warehouse (DW)
+* **MySQL**: Selected as the Relational Data Warehouse to host the Star Schema architecture.
+* **Dimensional Modeling**: Implemented using **Surrogate Keys** and an explicit **Grain** definition to comply with professional DW standards.
+
+### 📊 Business Intelligence (BI)
+* **Power BI Desktop**: The primary BI tool used to ingest the Data Warehouse tables and visualize the 6 key recruitment KPIs.
+* **MySQL Connector/NET**: Version 8.0.28, specifically chosen to ensure stable connectivity and resolve "None" value errors during data ingestion.
 
 ## 🛠️ Future Improvements
 

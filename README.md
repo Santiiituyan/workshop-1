@@ -27,8 +27,6 @@ This stage involved critical engineering decisions to balance data integrity wit
 
 ### 3. Star Schema Modeling & Loading (Load)
 
-## 🏗️ Design Decisions & Architectural Justification
-
 According to the project requirements, I implemented a **Star Schema** dimensional model. This decision was based on the following engineering principles:
 
 ### 1. Choice of Dimensional Modeling (Star Schema)
@@ -105,5 +103,27 @@ The project leverages a robust Python-based data ecosystem to manage the end-to-
 * **Automated Scalability**: Migrating the local MySQL instance to a cloud-based solution like AWS RDS.
 * **Predictive Analytics**: Implementing a Machine Learning model to predict candidate success based on historical interview scores.
 * **Real-time Pipeline**: Integrating Airflow for workflow orchestration and automated daily refreshes.
+
+## 🛠️ How to Run the Project
+
+Follow these steps to replicate the ETL process and the Dashboard:
+
+1.  **Database Setup**: Create a schema in MySQL (e.g., `etl_workshop`).
+2.  **Environment Configuration**: Create a `.env` file in the root directory with your credentials:
+    ```text
+    DB_USER=root
+    DB_PASSWORD=your_password
+    DB_HOST=localhost
+    DB_NAME=etl_workshop
+    ```
+3.  **Install Dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+4.  **Execute Pipeline**: Run the main script to process and load the data:
+    ```bash
+    python main.py
+    ```
+5.  **BI Visualization**: Open Power BI and connect to the MySQL database to view the updated dashboard.
 
 ---
